@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="b307beaa-d4d6-46a0-b49f-3e43ce7b57d2" name="ubuntu_server" url="http://222.198.138.240">
+        <fileTransfer host="222.198.138.240" port="10112" rootFolder="/home/fisher/workspace_xue" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="10112" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
