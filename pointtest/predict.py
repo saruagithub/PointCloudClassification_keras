@@ -13,7 +13,7 @@ from keras.utils import plot_model
 #read file
 # TEST_FILES = provider.getDataFiles('/Users/wangxue/gitpro/DL/pointcloud/pointtest/modelnet40_ply_hdf5_2048/test_files.txt')
 #load model
-model1 = load_model('pointtest/model/my_modelK11.h5') #load model
+model1 = load_model('pointtest/model/modelK11.h5') #load model
 
 predict_data, predict_label = provider.load_h5('pointtest/modelnet40_ply_hdf5_2048/ply_data_test1.h5')
 predict_data = predict_data[:, 0:2048, :]

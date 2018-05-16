@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import os
 import math
-from pointtest import provider
+import provider
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
@@ -20,12 +20,16 @@ import time
 # sys.path.append(BASE_DIR)
 # TRAIN_FILES = provider.getDataFiles(os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
 # TEST_FILES = provider.getDataFiles(os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
+#server
 TRAIN_FILES = provider.getDataFiles( 'modelnet40_ply_hdf5_2048/train_files.txt')
 TEST_FILES = provider.getDataFiles('modelnet40_ply_hdf5_2048/test_files.txt')
+#local
+# TRAIN_FILES = provider.getDataFiles( 'pointtest/modelnet40_ply_hdf5_2048/train_files1.txt')
+# TEST_FILES = provider.getDataFiles('pointtest/modelnet40_ply_hdf5_2048/test_files1.txt')
 NUM_POINT = 2048
 BATCH_SIZE = 32
 BASE_LEARNING_RATE = 0.001
-DirectoryNo = 'K14_1'
+DirectoryNo = 'K15'
 
 
 train_file_idxs = np.arange(0, len(TRAIN_FILES))
@@ -84,8 +88,8 @@ test_data,test_label = getTestData(test_file_idxs)
 model = Sequential()
 model.add(Conv2D(64,kernel_size=[1,3],strides=[1,1],padding='valid',activation='relu',input_shape=(NUM_POINT,3,1)))
 model.add(Conv2D(64,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
-# model.add(Conv2D(64,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(Conv2D(128,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
+model.add(Conv2D(512,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(Conv2D(1024,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(MaxPooling2D(pool_size=(NUM_POINT,1),strides=[2,2],padding='valid'))
 model.add(Flatten())
@@ -94,6 +98,20 @@ model.add(Dense(256,use_bias=True))
 model.add(Dropout(0.7))
 model.add(Dense(40,use_bias=True,activation='softmax'))
 
+# model.add(Conv2D(64, (1, 1), activation='relu', input_shape=(NUM_POINT, 3, 1)))
+# model.add(Conv2D(64, (1, 1), activation='relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Dropout(0.25))
+#
+# model.add(Conv2D(128, (3, 3), activation='relu'))
+# model.add(Conv2D(1024, (3, 3), activation='relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Dropout(0.25))
+#
+# model.add(Flatten())
+# model.add(Dense(256, activation='relu'))
+# model.add(Dropout(0.5))
+# model.add(Dense(10, activation='softmax'))
 
 #optimiser adam
 Adam = keras.optimizers.adam(lr=BASE_LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
@@ -124,4 +142,4 @@ model.fit_generator(generate_arrays(train_file_idxs),steps_per_epoch=256,epochs=
 					validation_data=generate_validation(train_file_idxs), validation_steps=64)
 score = model.evaluate(test_data, test_label, BATCH_SIZE)
 print(score)
-model.save(os.path.join('model/my_model' + DirectoryNo + '.h5'))
+model.save(os.path.join('model/model' + DirectoryNo + '.h5'))
