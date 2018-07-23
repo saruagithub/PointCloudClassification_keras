@@ -65,6 +65,7 @@ def calculate(filename):
 	#calculate the biggest probability and point cloud object type,save into the result list
 	for i in range(pre_objects):
 		for j in range(40):
+			#find the biggest probability,which means the prediction
 			if (pre[i][j] > max_probability):
 				max_probability = pre[i][j]
 				index1 = j
@@ -216,4 +217,4 @@ def drawPoint():
 
 
 if __name__ == '__main__':
-	app.run('127.0.0.1', 5002)
+	app.run('127.0.0.1', 5001)

@@ -16,13 +16,13 @@ def shuffle_data(data, labels):
 
 
 def rotate_point_cloud(batch_data):
-    """ Randomly rotate the point clouds to augument the dataset
-        rotation is per shape based along up direction
-        Input:
-          BxNx3 array, original batch of point clouds
-        Return:
-          BxNx3 array, rotated batch of point clouds
-    """
+    # Randomly rotate the point clouds to augument the dataset
+    #     rotation is per shape based along up direction
+    #     Input:
+    #       BxNx3 array, original batch of point clouds
+    #     Return:
+    #       BxNx3 array, rotated batch of point clouds
+    #
     rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
     for k in range(batch_data.shape[0]):
         rotation_angle = np.random.uniform() * 2 * np.pi
@@ -36,12 +36,11 @@ def rotate_point_cloud(batch_data):
     return rotated_data
 
 def rotate_point_cloud_by_angle(batch_data, rotation_angle):
-    """ Rotate the point cloud along up direction with certain angle.
-        Input:
-          BxNx3 array, original batch of point clouds
-        Return:
-          BxNx3 array, rotated batch of point clouds
-    """
+    # Rotate the point cloud along up direction with certain angle.
+    #     Input:
+    #       BxNx3 array, original batch of point clouds
+    #     Return:
+    #       BxNx3 array, rotated batch of point clouds
     rotated_data = np.zeros(batch_data.shape, dtype=np.float32)
     for k in range(batch_data.shape[0]):
         #rotation_angle = np.random.uniform() * 2 * np.pi
@@ -55,12 +54,12 @@ def rotate_point_cloud_by_angle(batch_data, rotation_angle):
     return rotated_data
 
 def jitter_point_cloud(batch_data, sigma=0.01, clip=0.05):
-    """ Randomly jitter points. jittering is per point.
-        Input:
-          BxNx3 array, original batch of point clouds
-        Return:
-          BxNx3 array, jittered batch of point clouds
-    """
+    # Randomly jitter points. jittering is per point.
+    #     Input:
+    #       BxNx3 array, original batch of point clouds
+    #     Return:
+    #       BxNx3 array, jittered batch of point clouds
+
     B, N, C = batch_data.shape
     assert(clip > 0)
     jittered_data = np.clip(sigma * np.random.randn(B, N, C), -1*clip, clip)
@@ -79,13 +78,3 @@ def load_h5(h5_filename):
 def loadDataFile(filename):
     return load_h5(filename)
 
-def load_h5_data_label_seg(h5_filename):
-    f = h5py.File(h5_filename)
-    data = f['data'][:]
-    label = f['label'][:]
-    seg = f['pid'][:]
-    return (data, label, seg)
-
-
-def loadDataFile_with_seg(filename):
-    return load_h5_data_label_seg(filename)

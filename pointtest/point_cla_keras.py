@@ -21,22 +21,22 @@ import time
 # TRAIN_FILES = provider.getDataFiles(os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/train_files.txt'))
 # TEST_FILES = provider.getDataFiles(os.path.join(BASE_DIR, 'data/modelnet40_ply_hdf5_2048/test_files.txt'))
 #server
-TRAIN_FILES = provider.getDataFiles( 'modelnet40_ply_hdf5_2048/train_files.txt')
-TEST_FILES = provider.getDataFiles('modelnet40_ply_hdf5_2048/test_files.txt')
+# TRAIN_FILES = provider.getDataFiles( 'modelnet40_ply_hdf5_2048/train_files.txt')
+# TEST_FILES = provider.getDataFiles('modelnet40_ply_hdf5_2048/test_files.txt')
 #local
-# TRAIN_FILES = provider.getDataFiles( 'pointtest/modelnet40_ply_hdf5_2048/train_files1.txt')
-# TEST_FILES = provider.getDataFiles('pointtest/modelnet40_ply_hdf5_2048/test_files1.txt')
+TRAIN_FILES = provider.getDataFiles( 'pointtest/modelnet40_ply_hdf5_2048/train_files1.txt')
+TEST_FILES = provider.getDataFiles('pointtest/modelnet40_ply_hdf5_2048/test_files1.txt')
 NUM_POINT = 2048
 BATCH_SIZE = 32
 BASE_LEARNING_RATE = 0.001
-DirectoryNo = 'K15'
+DirectoryNo = 'K17_4'  #to save the train process, apply to the tensorboard
 
 
 train_file_idxs = np.arange(0, len(TRAIN_FILES))
 np.random.shuffle(train_file_idxs)  # shuffle the file order
+
 def trainDataPreHandle(train_file_idxs):
 	current_data, current_label = provider.loadDataFile(TRAIN_FILES[train_file_idxs])
-	# print("load data",current_data.shape,current_label.shape)
 	current_data = current_data[:, 0:NUM_POINT, :]  #chose data
 	current_data, current_label, _ = provider.shuffle_data(current_data, np.squeeze(current_label))
 	current_data = provider.rotate_point_cloud(current_data)
@@ -44,9 +44,10 @@ def trainDataPreHandle(train_file_idxs):
 	current_data = current_data[:, :, :, np.newaxis]
 	current_label = np.squeeze(current_label)	#label
 	current_label = keras.utils.to_categorical(current_label, num_classes=40) #40 classes
+	print("load data", current_data.shape, current_label.shape)
 	return current_data,current_label
 
-def generate_arrays(train_file_idxs):
+def generate_traindatas(train_file_idxs):
 	while 1:
 		for fn in range(len(TRAIN_FILES)-1):
 			current_data0,current_label0 = trainDataPreHandle(train_file_idxs[fn]) #get from h5 file and handle it
@@ -60,15 +61,17 @@ def generate_arrays(train_file_idxs):
 				yield (current_data,current_label)
 #validation data
 def generate_validation(train_file_idxs):
-	while 1:
-		vali_data0,vali_label0 = trainDataPreHandle(train_file_idxs[len(TRAIN_FILES)-1])
-		batches = vali_data0.shape[0]//BATCH_SIZE
-		for batch_idx in range(batches):
-			start = batch_idx * BATCH_SIZE
-			end = (batch_idx + 1) * BATCH_SIZE
-			vali_data = vali_data0[start:end,:, :, :]
-			vali_label = vali_label0[start:end,:]
-			yield (vali_data,vali_label)
+	vali_data0, vali_label0 = trainDataPreHandle(train_file_idxs[len(TRAIN_FILES) - 1])
+	return (vali_data0,vali_label0)
+	# while 1:
+	# 	vali_data0,vali_label0 = trainDataPreHandle(train_file_idxs[len(TRAIN_FILES)-1])
+	# 	batches = vali_data0.shape[0]//BATCH_SIZE
+	# 	for batch_idx in range(batches):
+	# 		start = batch_idx * BATCH_SIZE
+	# 		end = (batch_idx + 1) * BATCH_SIZE
+	# 		vali_data = vali_data0[start:end,:, :, :]
+	# 		vali_label = vali_label0[start:end,:]
+	# 		yield (vali_data,vali_label)
 
 def getTestData(test_file_idxs):
 	# for fn in range(len(TEST_FILES)):
@@ -88,45 +91,36 @@ test_data,test_label = getTestData(test_file_idxs)
 model = Sequential()
 model.add(Conv2D(64,kernel_size=[1,3],strides=[1,1],padding='valid',activation='relu',input_shape=(NUM_POINT,3,1)))
 model.add(Conv2D(64,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
+# model.add(MaxPooling2D(pool_size=(NUM_POINT/2,1),strides=[2,2],padding='valid'))
+model.add(Conv2D(64,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(Conv2D(128,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
-model.add(Conv2D(512,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
+# model.add(Conv2D(512,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(Conv2D(1024,kernel_size=[1,1],strides=[1,1],padding='valid',activation='relu'))
 model.add(MaxPooling2D(pool_size=(NUM_POINT,1),strides=[2,2],padding='valid'))
 model.add(Flatten())
 model.add(Dense(512,use_bias=True,activation='relu'))
 model.add(Dense(256,use_bias=True))
-model.add(Dropout(0.7))
+# model.add(Dense(128,use_bias=True))
+model.add(Dropout(0.8))
 model.add(Dense(40,use_bias=True,activation='softmax'))
 
-# model.add(Conv2D(64, (1, 1), activation='relu', input_shape=(NUM_POINT, 3, 1)))
-# model.add(Conv2D(64, (1, 1), activation='relu'))
-# model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(Dropout(0.25))
-#
-# model.add(Conv2D(128, (3, 3), activation='relu'))
-# model.add(Conv2D(1024, (3, 3), activation='relu'))
-# model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(Dropout(0.25))
-#
-# model.add(Flatten())
-# model.add(Dense(256, activation='relu'))
-# model.add(Dropout(0.5))
-# model.add(Dense(10, activation='softmax'))
-
 #optimiser adam
-Adam = keras.optimizers.adam(lr=BASE_LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-model.compile(loss='categorical_crossentropy', optimizer=Adam, metrics=['accuracy'])
+# Adam = keras.optimizers.adam(lr=BASE_LEARNING_RATE, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+# sgd = keras.optimizers.SGD(lr=BASE_LEARNING_RATE, momentum=0.9, decay=0.0, nesterov=False)
+agd = keras.optimizers.Adagrad(lr=BASE_LEARNING_RATE, epsilon=1e-06)
+model.compile(loss='categorical_crossentropy', optimizer=agd, metrics=['accuracy'])
 #save the log about acc & loss, show in tensorboard
-s_time = time.strftime("%Y%m%d%H%M%S", time.localtime())  #timestamp - file time name
+# s_time = time.strftime("%Y%m%d%H%M%S", time.localtime())  #timestamp - file time name
 # logs_path = os.path.join(BASE_DIR,'logs/log_%s'%(s_time))
-logs_path = 'logs/log_%s'%(s_time) + DirectoryNo
+# logs_path = 'logs/log_%s'%(s_time) + DirectoryNo
+logs_path = 'logs/' + DirectoryNo
 try:
 	os.makedirs(logs_path)
 except:
 	pass
-tensorboard = TensorBoard(log_dir=logs_path, histogram_freq=0,write_graph=True) #draw line pic
+tensorboard = TensorBoard(log_dir=logs_path, histogram_freq=0,write_graph=True,write_images=0) #draw line pic
 def lrScheduler(epoch):
-	if epoch > 120:
+	if epoch > 100:
 		return 0.000001
 	if epoch > 80:
 		return 0.00001
@@ -137,8 +131,9 @@ def lrScheduler(epoch):
 change_lr = keras.callbacks.LearningRateScheduler(lrScheduler) #epoch at 30,lrate decline
 lrate = keras.callbacks.ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=10, verbose=0,
 								  mode='auto', epsilon=0.0001, cooldown=10, min_lr=0.0000001) #not use
+earlystop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=60, verbose=0, mode='auto')
 
-model.fit_generator(generate_arrays(train_file_idxs),steps_per_epoch=256,epochs=150,verbose=2,callbacks=[tensorboard,change_lr,lrate],
+model.fit_generator(generate_traindatas(train_file_idxs),steps_per_epoch=256,epochs=150,verbose=2,callbacks=[tensorboard,change_lr,lrate,earlystop],
 					validation_data=generate_validation(train_file_idxs), validation_steps=64)
 score = model.evaluate(test_data, test_label, BATCH_SIZE)
 print(score)

@@ -1,2 +1,0 @@
-modelnet40_ply_hdf5_2048/ply_data_test0.h5
-/Users/wangxue/gitpro/DL/pointcloud/pointtest/modelnet40_ply_hdf5_2048/ply_data_test1.h5
