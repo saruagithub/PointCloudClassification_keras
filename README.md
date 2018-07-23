@@ -1,6 +1,8 @@
 # PointCloudClassification_keras
 tag: Point cloud classification, deep learning, keras
 
+environment: python3.6,tensorflow1.6, Flask0.12, Keras 2.1.5
+
 provider.py 对H5点云文件的数据进行读取，进行随机打乱，抖动处理
 
 Point_cla_keras.py 读取训练集数据，定义训练集的generator函数，构建神经网络，使用优化函数，tenorboard可视化训练过程，评估训练效果并保存模型到Model文件夹下
