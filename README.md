@@ -16,3 +16,5 @@ Matplotlib_draw.py 使用类似MATLAB的方法绘制点云的散点图，以可�
 writeH5.py 拆分点云H5文件
 
 H5toPcd.py 将H5格式的点云转换为PCD格式的点云文件
+
+注：pointtest文件夹下有excels,logs,model,modelNet40_ply_hdf5_2048, pcdfiles,uploadFiles文件夹，用于存放相应的数据文件
