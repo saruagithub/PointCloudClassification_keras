@@ -17,4 +17,6 @@ writeH5.py 拆分点云H5文件
 
 H5toPcd.py 将H5格式的点云转换为PCD格式的点云文件
 
-注：pointtest文件夹下有excels,logs,model,modelNet40_ply_hdf5_2048, pcdfiles,uploadFiles文件夹，用于存放相应的数据文件
+其他文件夹：pointtest文件夹下有excels,logs,model,modelNet40_ply_hdf5_2048, pcdfiles,uploadFiles文件夹，用于存放相应的数据文件
+
+原理：将点云的点和其xyz坐标看做一张图进行卷积，但卷积核是按点大小来的，第一层卷积是1* 3 的大小，即对点卷积。然后后面都是 1 * 1的大小
